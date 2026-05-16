@@ -6,7 +6,13 @@ export default function ChatInput({send}) {
   const input = useRef();
 
   return (
-    <div className="chat-input">
+    <div className="chat-input" onKeyDown={(event) => {
+      if (event.key === 'Enter') {
+        send(input.current.value);
+        input.current.value = "";
+      }
+
+    }}>
 
       <input
         ref={input}
