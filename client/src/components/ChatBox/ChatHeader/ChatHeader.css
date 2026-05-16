@@ -1,0 +1,38 @@
+.chat-header {
+  background: #0984e3;
+  color: white;
+
+  padding: 15px;
+
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+
+  border-radius: 50%;
+
+  background: white;
+  color: #0984e3;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-weight: bold;
+
+  margin-right: 10px;
+}
+
+.header-info h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.header-info p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
