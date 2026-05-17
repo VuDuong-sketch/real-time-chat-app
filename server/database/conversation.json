@@ -1,0 +1,103 @@
+[
+  {
+    "username1": "vuduong",
+    "username2": "haidang",
+    "messages": [
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "Xin chào 👋"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "haidang",
+        "content": "Chào bạn!"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "alo"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "hello"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "lancad"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "nnc"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "nn"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "haidang",
+        "content": "nn"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "looo"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "cndjdj"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "csdcd"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "vdfsi"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "vdicusod"
+      },
+      {
+        "sender": "haidang",
+        "receiver": "vuduong",
+        "content": "hello"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "haidang",
+        "content": "holle"
+      }
+    ]
+  },
+  {
+    "username1": "vv0",
+    "username2": "ddd",
+    "messages": []
+  },
+  {
+    "username1": "vv0",
+    "username2": "ddd",
+    "messages": []
+  },
+  {
+    "username1": "vv0",
+    "username2": "ddd",
+    "messages": []
+  },
+  {
+    "username1": "vv0",
+    "username2": "ddd",
+    "messages": []
+  }
+]

@@ -1,14 +1,19 @@
 import { useRef } from "react"
 import "./ChatInput.css"
+import { controller } from "../../../../control";
 
-export default function ChatInput({send}) {
+export default function ChatInput({destUsername}) {
 
   const input = useRef();
 
   return (
     <div className="chat-input" onKeyDown={(event) => {
       if (event.key === 'Enter') {
-        send(input.current.value);
+        controller.send({
+          sender: controller.username,
+          receiver: destUsername,
+          content: input.current.value
+        });
         input.current.value = "";
       }
 
@@ -22,7 +27,11 @@ export default function ChatInput({send}) {
       />
 
       <button onClick={() => {
-        send(input.current.value);
+        controller.send({
+          sender: controller.username,
+          receiver: destUsername,
+          content: input.current.value
+        });
         input.current.value = "";
       }}>
         Gửi

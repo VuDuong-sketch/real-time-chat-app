@@ -1,29 +1,28 @@
-import ChatBox from "./components/ChatBox/ChatBox"
+import { useRef, useState } from "react"
+import ChuaDangNhap from "./components/ChuaDangNhap/ChuaDangNhap";
+import DaDangNhap from "./components/DaDangNhap/DaDangNhap"
+import { controller } from './control';
 
 export default function App() {
 
-  const header = {
-    avatar: "Vũ",
-    name: "Dương Minh Vũ",
-    activeStatus: "Đang hoạt động"
-  }
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const data = useRef([]);
 
-  const messages = [
-    {
-      type: "other-message",
-      time: "10:30",
-      content: "Xin chào 👋"
-    },
-    {
-      type: "my-message",
-      time: "10:31",
-      content: "Chào bạn!"
+  async function login(username, password) {
+    const msg = await controller.login(username, password);
+    if (msg !== false) {
+      setIsLoggedIn(true);
+      data.current = msg;
+      return true;
+    } else {
+      return false;
     }
-  ]
+  }
 
   return (
     <>
-      <ChatBox header={header} messages={messages} />
+      {!isLoggedIn && <ChuaDangNhap login={login} />}
+      {isLoggedIn && <DaDangNhap initConversations={data.current} />}
     </>
   )
 }
