@@ -2,8 +2,8 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-
-import { controller } from './control.js';
+import { SocketListener } from './SocketListener.js';
+import { databaseManager } from './database/DatabaseManager.js';
 
 const app = express();
 
@@ -17,29 +17,36 @@ const io = new Server(server, {
   }
 });
 
+const socketListeners = {};
+
 io.on("connection", (socket) => {
   console.log("User connected");
 
-  let queue = null;
+  let socketListener = null;
+  let username = null;
 
-  socket.on("login", data => {
-    if (controller.handleLogin(data.username, data.password)) {
-      queue = controller.createQueue(socket, data.username);
-      socket.emit("login", controller.getConversations(data.username));
+  socket.on("login", msg => {
+    if (databaseManager.login(msg.username, msg.password)) {
+
+      username = msg.username;
+      socketListener = new SocketListener(socket, socketListeners);
+      socketListeners[username] = socketListener;
+      socket.emit("login", databaseManager.getConversations(username));
+
     } else {
       socket.emit("login", false);
     }
   });
 
-  socket.on("chat", msg => {
-    console.log(msg);
-    queue.push({
-      eventName: "chat",
-      ...msg
-    });
+  socket.on("chat", message => {
+    console.log(message);
+    socketListener.handleChatMessageFromSocket(message);
   });
 
   socket.on("disconnect", () => {
+
+    socketListener = null;
+    delete socketListeners[username];
     console.log("Disconnected");
   });
 });

@@ -2,14 +2,16 @@ import "./ChatBox.css";
 import ChatHeader from "./ChatHeader/ChatHeader";
 import ChatMessages from "./ChatMessages/ChatMessages";
 import ChatInput from "./ChatInput/ChatInput";
+import { useEffect } from "react";
+import { controller } from "../../../control";
 
-export default function ChatBox({header, messages, back}) {
+export default function ChatBox({friend, back}) {
 
   return (
     <div className="chat-container">
-      <ChatHeader {...header} back={back} />
-      <ChatMessages messages={messages} />
-      <ChatInput destUsername={header.name} />
+      <ChatHeader name={friend} back={back} />
+      <ChatMessages friend={friend} />
+      <ChatInput friend={friend} />
     </div>
   )
 }

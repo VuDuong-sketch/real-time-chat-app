@@ -2,7 +2,7 @@ import { useRef } from "react"
 import "./ChatInput.css"
 import { controller } from "../../../../control";
 
-export default function ChatInput({destUsername}) {
+export default function ChatInput({friend}) {
 
   const input = useRef();
 
@@ -11,7 +11,7 @@ export default function ChatInput({destUsername}) {
       if (event.key === 'Enter') {
         controller.send({
           sender: controller.username,
-          receiver: destUsername,
+          receiver: friend,
           content: input.current.value
         });
         input.current.value = "";
@@ -29,7 +29,7 @@ export default function ChatInput({destUsername}) {
       <button onClick={() => {
         controller.send({
           sender: controller.username,
-          receiver: destUsername,
+          receiver: friend,
           content: input.current.value
         });
         input.current.value = "";

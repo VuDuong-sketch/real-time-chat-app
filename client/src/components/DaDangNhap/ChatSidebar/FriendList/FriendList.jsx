@@ -1,11 +1,11 @@
 import "./FriendList.css"
 import Friend from "./Friend"
 
-export default function FriendList({friendList, onClick}) {
+export default function FriendList({friendList, chooseFriend}) {
   return (
     <div class="friend-list">
 
-      {friendList.map((user, index) => <Friend avatar="V" name={user.username} onClick={() => onClick(user.username)} key={index} />)}
+      {friendList.map((username, index) => <Friend avatar="V" name={username} onClick={() => chooseFriend(username)} key={index} />)}
 
     </div>
   )
