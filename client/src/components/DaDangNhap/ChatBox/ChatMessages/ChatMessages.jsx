@@ -16,12 +16,7 @@ export default function ChatMessages({friend}) {
 
   useEffect(() => {
     console.log("Chạy useEffect");
-    (async () => {
-      while (await controller.queue.pop()) { // nếu nhận dc false nghĩa là hiển thị friendlist (ấn back)
-        reRender();
-        console.log("Hiển thị tin nhắn mới");
-      }
-    })();
+    controller.updateMessagesInChatBox = reRender;
   }, [])
 
   return (

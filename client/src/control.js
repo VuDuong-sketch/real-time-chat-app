@@ -1,18 +1,15 @@
 import { io } from "socket.io-client";
-import { AsyncQueue } from "./AsyncQueue";
 
 const socket = io("http://localhost:3001");
 
-export let foo1 = () => {};
-export let foo2 = () => {};
-
 export const controller = {
   isLoggedIn: false,
+  isChatBox: false,
   username: undefined,
   password: undefined,
   data: null,  // mảng các cuộc trò chuyện
-  queue: new AsyncQueue(),
-  otherQueue: new AsyncQueue(),
+  updateMessagesInChatBox: () => {},
+  updateMessagesInChatSidebar: () => {},
 
   login: async function (username, password) { // true or false
 
@@ -43,12 +40,6 @@ export const controller = {
 
   run() {
 
-    (async () => {
-      while (true) {
-        this.queue.push(await this.otherQueue.pop())
-      }
-    })();
-
     socket.on("chat", message => {
 
       const friendUsernameOfTheMessage = (message.sender === this.username ? message.receiver : message.sender);
@@ -62,10 +53,12 @@ export const controller = {
         }
       }
 
-      if (this.queue.queue.length === 0) {
-        this.queue.push(true);
+      if (this.isChatBox) {
+        this.updateMessagesInChatBox();
+        console.log("Hiển thị tin nhắn mới");
+      } else {
+        this.updateMessagesInChatSidebar(); // hàm này để code sau (hiện tại không có tác dụng gì cả)
       }
-      
     })
   },
 
@@ -79,15 +72,7 @@ export const controller = {
     }
   },
 
-  getFriends() { // mảng các username của các friend
-    //   const users = conversations.map((conversation) => {
-//     if (conversation.username1 === controller.username) {
-//       return { username: conversation.username2 }
-//     } else {
-//       return { username: conversation.username1 }
-//     }
-//   });
-
+  getFriends() {
     return this.data.map(conversation => (conversation.username1 === this.username ? conversation.username2 : conversation.username1))
   }
 }
