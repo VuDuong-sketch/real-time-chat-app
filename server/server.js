@@ -38,6 +38,14 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("register", msg => {
+    socket.emit("register", databaseManager.register(msg.username, msg.password));
+  })
+
+  socket.on("search", name => {
+    socket.emit("search", databaseManager.hasUser(name))
+  })
+
   socket.on("chat", message => {
     console.log(message);
     socketListener.handleChatMessageFromSocket(message);

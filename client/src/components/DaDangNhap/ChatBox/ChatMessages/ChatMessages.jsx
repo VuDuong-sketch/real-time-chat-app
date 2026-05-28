@@ -15,7 +15,6 @@ export default function ChatMessages({friend}) {
   });
 
   useEffect(() => {
-    console.log("Chạy useEffect");
     controller.updateMessagesInChatBox = reRender;
   }, [])
 

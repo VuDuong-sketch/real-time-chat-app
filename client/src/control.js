@@ -11,7 +11,7 @@ export const controller = {
   updateMessagesInChatBox: () => {},
   updateMessagesInChatSidebar: () => {},
 
-  login: async function (username, password) { // true or false
+  async login(username, password) { // true or false
 
     let foo = null;
 
@@ -34,6 +34,19 @@ export const controller = {
     return false;
   },
 
+  async register(username, password) { // true or false
+
+    let foo = null;
+
+    socket.on("register", msg => {
+      foo(msg);
+    });
+
+    socket.emit("register", {username: username, password: password});
+
+    return await new Promise(resolve => {foo = resolve;});
+  },
+
   send(message) {
     socket.emit("chat", message);
   },
@@ -44,18 +57,28 @@ export const controller = {
 
       const friendUsernameOfTheMessage = (message.sender === this.username ? message.receiver : message.sender);
 
+      let isFirstMessage = true;
+
       for (let i = 0; i < this.data.length; i++) {
         const conversation = this.data[i];
         const friendUsernameOfThisConversation = (conversation.username1 === this.username ? conversation.username2 : conversation.username1);
         if (friendUsernameOfThisConversation === friendUsernameOfTheMessage) {
           this.data[i].messages.push(message);
+          isFirstMessage = false;
           break;
         }
       }
 
+      if (isFirstMessage) {
+        this.data.push({
+          username1: message.sender,
+          username2: message.receiver,
+          messages: [message]
+        })
+      }
+
       if (this.isChatBox) {
         this.updateMessagesInChatBox();
-        console.log("Hiển thị tin nhắn mới");
       } else {
         this.updateMessagesInChatSidebar(); // hàm này để code sau (hiện tại không có tác dụng gì cả)
       }
@@ -70,10 +93,25 @@ export const controller = {
         return conversation.messages;
       }
     }
+    return [];
   },
 
   getFriends() {
     return this.data.map(conversation => (conversation.username1 === this.username ? conversation.username2 : conversation.username1))
+  },
+
+  async search(name) {
+
+    let foo = null;
+
+    socket.on("search", existUser => {
+      console.log(existUser);
+      foo(existUser);
+    });
+
+    socket.emit("search", name);
+
+    return await new Promise(resolve => {foo = resolve;});
   }
 }
 

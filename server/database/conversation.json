@@ -277,27 +277,75 @@
         "sender": "vuduong",
         "receiver": "haidang",
         "content": "loooo"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "haidang",
+        "content": "dvnsc"
       }
     ]
   },
   {
-    "username1": "vv0",
-    "username2": "ddd",
-    "messages": []
+    "username1": "vuduong",
+    "username2": "minh",
+    "messages": [
+      {
+        "sender": "vuduong",
+        "receiver": "minh",
+        "content": "hello"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "minh",
+        "content": "alo"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "minh",
+        "content": "ncds"
+      },
+      {
+        "sender": "minh",
+        "receiver": "vuduong",
+        "content": "sncvc'"
+      }
+    ]
   },
   {
-    "username1": "vv0",
-    "username2": "ddd",
-    "messages": []
+    "username1": "vu",
+    "username2": "haidang",
+    "messages": [
+      {
+        "sender": "vu",
+        "receiver": "haidang",
+        "content": "hello"
+      }
+    ]
   },
   {
-    "username1": "vv0",
-    "username2": "ddd",
-    "messages": []
-  },
-  {
-    "username1": "vv0",
-    "username2": "ddd",
-    "messages": []
+    "username1": "vuduong",
+    "username2": "vu",
+    "messages": [
+      {
+        "sender": "vuduong",
+        "receiver": "vu",
+        "content": "hello"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "vu",
+        "content": "alo"
+      },
+      {
+        "sender": "vuduong",
+        "receiver": "vu",
+        "content": "nvdif"
+      },
+      {
+        "sender": "vu",
+        "receiver": "vuduong",
+        "content": "vnidsc"
+      }
+    ]
   }
 ]

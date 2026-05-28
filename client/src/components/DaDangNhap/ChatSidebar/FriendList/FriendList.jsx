@@ -3,9 +3,9 @@ import Friend from "./Friend"
 
 export default function FriendList({friendList, chooseFriend}) {
   return (
-    <div class="friend-list">
+    <div className="friend-list">
 
-      {friendList.map((username, index) => <Friend avatar="V" name={username} onClick={() => chooseFriend(username)} key={index} />)}
+      {friendList.map((username, index) => <Friend name={username} onClick={() => chooseFriend(username)} key={index} />)}
 
     </div>
   )

@@ -4,7 +4,7 @@ export default function ChatHeader({ name, back }) {
   return (
     <div className="chat-header">
 
-      <button onClick={back} class="back-btn">
+      <button onClick={back} className="back-btn">
         ←
       </button>
       <div className="avatar">V</div>

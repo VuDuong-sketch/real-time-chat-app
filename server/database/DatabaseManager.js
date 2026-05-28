@@ -7,7 +7,29 @@ export const databaseManager = {
   login(username, password) {
     for (const user of users) {
       if (user.username === username && user.password === password) {
-        return true
+        return true;
+      }
+    }
+    return false;
+  },
+  
+  register(username, password) {
+    if (this.hasUser(username)) {
+      return false;
+    } else {
+      users.push({
+        username: username,
+        password: password
+      });
+      fs.writeFile('./database/user.json', JSON.stringify(users, null, 2), err => {});
+      return true;
+    }
+  },
+  
+  hasUser(username) {
+    for (const user of users) {
+      if (user.username === username) {
+        return true;
       }
     }
     return false;
@@ -28,16 +50,17 @@ export const databaseManager = {
       if ((conversation.username1 === username1 && conversation.username2 === username2) || (conversation.username1 === username2 && conversation.username2 === username1)) {
         conversations[i]["messages"].push(message);
         await fs.writeFile('./database/conversation.json', JSON.stringify(conversations, null, 2), err => {});
-        break;
+        return;
       }
     }
+    this.addConversation(username1, username2, message);
   },
 
-  async addConversation(username1, username2) {
+  async addConversation(username1, username2, firstMessage) {
     conversations.push({
       username1: username1,
       username2: username2,
-      messages: []
+      messages: [firstMessage]
     });
     await fs.writeFile('./database/conversation.json', JSON.stringify(conversations, null, 2), 'utf-8', err => {});
   },

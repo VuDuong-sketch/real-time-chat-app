@@ -1,4 +1,4 @@
-export default function Friend({name, onClick}) {
+export default function SauKhiTimKiem({name, onClick}) {
   return (
     <div onClick={onClick} className="friend">
 

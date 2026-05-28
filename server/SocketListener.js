@@ -7,10 +7,12 @@ export class SocketListener {
   }
 
   handleChatMessageFromSocket(message) {
-    databaseManager.sendMessage(message.sender, message.receiver, message);
-    this.socket.emit("chat", message);
-    if (message.receiver in this.colleagues) {
-      this.colleagues[message.receiver].handleChatMessageFromColleague(message);
+    if (databaseManager.hasUser(message.receiver) && message.receiver != message.sender) {
+      databaseManager.sendMessage(message.sender, message.receiver, message);
+      this.socket.emit("chat", message);
+      if (message.receiver in this.colleagues) {
+        this.colleagues[message.receiver].handleChatMessageFromColleague(message);
+      }
     }
   }
 
