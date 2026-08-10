@@ -1,22 +1,37 @@
-import { useState } from "react"
-import ChuaDangNhap from "./components/ChuaDangNhap/ChuaDangNhap";
-import { DaDangNhap } from "./components/DaDangNhap/DaDangNhap"
-import { controller } from './control';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import './App.css';
+import Chat from './pages/Chat';
+import AppLayout from './layouts/AppLayout';
+import AuthLayout from './layouts/AuthLayout';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import InvalidRoute from './routes/InvalidRoute';
+import PublicRoute from './routes/PublicRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 
-export default function App() {
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  async function login(username, password) {
-    if (await controller.login(username, password)) {
-      setIsLoggedIn(true);
-    }
-  }
+function App() {
 
   return (
-    <>
-      {!isLoggedIn && <ChuaDangNhap login={login} />}
-      {isLoggedIn && <DaDangNhap />}
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route element={<PublicRoute />}>
+          <Route element={<AuthLayout />}>
+            <Route path='/login' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path='/chats' element={<></>} /> {/* chưa chọn đoạn chat nào */}
+            <Route path='/chats/:otherPartyId' element={<Chat />} />
+          </Route>
+        </Route>
+        
+        <Route path='*' element={<InvalidRoute />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
+
+export default App;
