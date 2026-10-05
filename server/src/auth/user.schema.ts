@@ -1,13 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ChatEnum } from 'src/enum/chat.enum';
+import { HydratedDocument } from 'mongoose';
 
-export interface ChatRef {
-  chatId: string;
-  otherPartyId: string;
-  otherPartyUsername: string;
-  role: ChatEnum;
-  read: boolean;
-}
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ collection: 'users' })
 export class User {
@@ -16,9 +10,6 @@ export class User {
 
   @Prop({ required: true })
   password: string;
-
-  @Prop({ required: true })
-  chats: ChatRef[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

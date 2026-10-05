@@ -7,10 +7,14 @@ import {
   Post,
   Req,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UserService } from './user.service';
 import type { Request } from 'express';
+import { SendDto } from './dto/send.dto';
+import { SearchDto } from './dto/search.dto';
+import { ReadDto } from './dto/read.dto';
 
 @UseGuards(AuthGuard)
 @Controller()
@@ -26,24 +30,24 @@ export class UserController {
   @Post('send')
   async send(
     @Req() { user }: Request,
-    @Body() body: { otherPartyId: string; content: string },
+    @Body(new ValidationPipe()) sendDto: SendDto,
   ): Promise<void> {
-    await this.userService.send(user.id, body.otherPartyId, body.content);
+    await this.userService.send(user.id, sendDto.otherPartyId, sendDto.content);
   }
 
   @Post('search')
   search(
-    @Body() body: { otherPartyUsername: string },
+    @Body(new ValidationPipe()) searchDto: SearchDto,
   ): Promise<{ otherPartyId: string }> {
-    return this.userService.search(body.otherPartyUsername);
+    return this.userService.search(searchDto.otherPartyUsername);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('read')
-  async read(
+  read(
     @Req() { user }: Request,
-    @Body() body: { otherPartyId: string },
-  ): Promise<void> {
-    await this.userService.read(user.id, body.otherPartyId);
+    @Body(new ValidationPipe()) readDto: ReadDto,
+  ): void {
+    this.userService.read(user.id, readDto.otherPartyId);
   }
 }

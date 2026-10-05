@@ -26,7 +26,6 @@ export class AuthService {
       await this.userModel.create({
         username,
         password,
-        chats: [],
       });
 
       return {

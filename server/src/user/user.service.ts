@@ -1,14 +1,11 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Chat } from './chat.schema';
+import { Chat, ChatDocument } from './chat.schema';
 import { Model } from 'mongoose';
-import { User } from 'src/auth/user.schema';
-import { ChatEnum } from 'src/enum/chat.enum';
+import { User, UserDocument } from 'src/auth/user.schema';
 import { NotificationService } from 'src/handle-real-time/notify.service';
+import { ChatResponseDto } from './dto/chat-response.dto';
+import { ChatUserRole } from 'src/enum/chat-user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -20,62 +17,40 @@ export class UserService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async getChats(id: string): Promise<object[]> {
-    const chats = (await this.userModel.findById(id))?.chats;
+  async getChats(userId: string): Promise<ChatResponseDto[]> {
+    const chats = [
+      ...(await this.chatModel.find({ user1: userId }).populate<{
+        user1: UserDocument;
+        user2: UserDocument;
+      }>(['user1', 'user2'])),
+      ...(await this.chatModel.find({ user2: userId }).populate<{
+        user1: UserDocument;
+        user2: UserDocument;
+      }>(['user1', 'user2'])),
+    ];
 
-    const chatsForFrontend: {
-      messages: {
-        sender: string;
-        content: string;
-      }[];
-      otherPartyUsername: string;
-      otherPartyId: string;
-      latestMessage: {
-        sender: string;
-        content: string;
-      };
-      read: boolean;
-    }[] = [];
+    chats.sort((a, b) => {
+      const latestMessageTimestampA = a.messages.at(-1)?.timestamp;
+      const latestMessageTimestampB = b.messages.at(-1)?.timestamp;
 
-    if (chats) {
-      for (let i = 0; i < chats.length; i++) {
-        const chatRef = chats[i];
+      if (
+        latestMessageTimestampA === undefined ||
+        latestMessageTimestampB === undefined
+      )
+        return 1;
 
-        const chat = await this.chatModel.findById(chatRef.chatId);
+      return latestMessageTimestampB - latestMessageTimestampA;
+    });
 
-        if (!chat) throw new UnauthorizedException();
+    const chatsForFrontend = chats.map((chat) => {
+      const otherParty = chat.user1.id === userId ? chat.user2 : chat.user1;
+      const userRole =
+        chat.user1.id === userId ? ChatUserRole.USER1 : ChatUserRole.USER2;
 
-        const latestMessage = chat.messages[chat.messages.length - 1]; // đây là tin nhắn phía server
+      return new ChatResponseDto(userRole, chat.messages, otherParty);
+    });
 
-        const messagesForFrontend = chat.messages.map((message) => ({
-          ...message,
-          sender:
-            message.sender === chatRef.role
-              ? ChatEnum.SELF
-              : ChatEnum.OTHER_PARTY,
-        }));
-
-        const latestMessageForFrontend = {
-          ...latestMessage,
-          sender:
-            latestMessage.sender === chatRef.role
-              ? ChatEnum.SELF
-              : ChatEnum.OTHER_PARTY,
-        };
-
-        chatsForFrontend.push({
-          messages: messagesForFrontend,
-          otherPartyUsername: chatRef.otherPartyUsername,
-          otherPartyId: chatRef.otherPartyId,
-          latestMessage: latestMessageForFrontend,
-          read: chatRef.read,
-        });
-      }
-
-      return chatsForFrontend;
-    } else {
-      throw new UnauthorizedException();
-    }
+    return chatsForFrontend;
   }
 
   async send(
@@ -85,9 +60,6 @@ export class UserService {
   ): Promise<void> {
     // Add vào đoạn chat
     await this.addToChat(selfId, otherPartyId, content);
-
-    // Đẩy đoạn chat đó lên đầu của các user
-    await this.moveChatToTop(selfId, otherPartyId);
 
     // Thông báo realtime cho đối phương biết
     this.notificationService.notify(otherPartyId);
@@ -103,20 +75,8 @@ export class UserService {
     }
   }
 
-  async read(selfId: string, otherPartyId: string): Promise<void> {
-    const self = await this.userModel.findById(selfId);
-
-    if (!self) throw new UnauthorizedException();
-
-    const chat = self.chats.find((chat) => chat.otherPartyId === otherPartyId);
-
-    if (!chat) throw new UnauthorizedException();
-
-    if (chat.read) return;
-    else {
-      chat.read = true;
-      await this.userModel.findByIdAndUpdate(selfId, self);
-    }
+  read(selfId: string, otherPartyId: string): void {
+    console.log(selfId, otherPartyId);
   }
 
   private async addToChat(
@@ -124,123 +84,34 @@ export class UserService {
     otherPartyId: string,
     content: string,
   ) {
-    const self = await this.userModel.findById(selfId);
-    const otherParty = await this.userModel.findById(otherPartyId);
+    let chat: ChatDocument | null;
 
-    if (!self || !otherParty) throw new UnauthorizedException();
+    chat = await this.chatModel.findOne({ user1: selfId, user2: otherPartyId });
 
-    const chatRef = self.chats.find(
-      (chat) => chat.otherPartyId === otherPartyId,
-    );
+    if (!chat)
+      chat = await this.chatModel.findOne({
+        user1: otherPartyId,
+        user2: selfId,
+      });
 
-    let chatId: string;
+    if (!chat)
+      chat = await this.chatModel.create({
+        user1: selfId,
+        user2: otherPartyId,
+        messages: [],
+      });
 
-    // Nếu 2 ng chưa từng trò chuyện
-    if (!chatRef) {
-      const chat = await this.chatModel.create({ messages: [] });
-      chatId = chat.id;
-
-      // Tạo chat ref ở cả 2 người với chatId
-      await this.createChat(selfId, otherPartyId, chatId);
-    } else {
-      chatId = chatRef.chatId;
-    }
-
-    const chat = await this.chatModel.findById(chatId);
-
-    if (!chat) throw new UnauthorizedException();
-
-    const message = {
-      sender: chatRef ? chatRef.role : ChatEnum.USER1,
-      content,
-    };
-
-    chat.messages.push(message);
-
-    await this.chatModel.findByIdAndUpdate(chatId, chat);
-  }
-
-  private async createChat(
-    selfId: string,
-    otherPartyId: string,
-    chatId: string,
-  ) {
-    const self = await this.userModel.findById(selfId);
-    const otherParty = await this.userModel.findById(otherPartyId);
-
-    if (!self || !otherParty) throw new UnauthorizedException();
-
-    self.chats.unshift({
-      chatId,
-      otherPartyId,
-      otherPartyUsername: otherParty?.username,
-      role: ChatEnum.USER1,
-      read: true,
+    await chat.updateOne({
+      $push: {
+        messages: {
+          sender:
+            chat.user1.toString() === selfId
+              ? ChatUserRole.USER1
+              : ChatUserRole.USER2,
+          content,
+          timestamp: Date.now(),
+        },
+      },
     });
-
-    otherParty.chats.unshift({
-      chatId,
-      otherPartyId: self.id,
-      otherPartyUsername: self.username,
-      role: ChatEnum.USER2,
-      read: true,
-    });
-
-    await this.userModel.findByIdAndUpdate(selfId, self);
-    await this.userModel.findByIdAndUpdate(otherPartyId, otherParty);
-  }
-
-  private async moveChatToTop(
-    selfId: string,
-    otherPartyId: string,
-  ): Promise<void> {
-    const self = await this.userModel.findById(selfId);
-    const otherParty = await this.userModel.findById(otherPartyId);
-
-    if (!self || !otherParty) throw new UnauthorizedException();
-
-    const chatId = self.chats.find(
-      (chat) => chat.otherPartyId === otherPartyId,
-    )?.chatId;
-
-    if (!chatId) {
-      throw new UnauthorizedException();
-    }
-
-    // Đẩy đoạn chat đó lên đầu của user
-    const selfChats = self.chats;
-    const otherPartyChats = otherParty.chats;
-
-    for (
-      let i = selfChats.findIndex((item) => item.chatId === chatId);
-      i > 0;
-      i--
-    ) {
-      // swap i and i - 1
-      const tmp = selfChats[i];
-      selfChats[i] = selfChats[i - 1];
-      selfChats[i - 1] = tmp;
-    }
-
-    for (
-      let i = otherPartyChats.findIndex((item) => item.chatId === chatId);
-      i > 0;
-      i--
-    ) {
-      // swap i and i - 1
-      const tmp = otherPartyChats[i];
-      otherPartyChats[i] = otherPartyChats[i - 1];
-      otherPartyChats[i - 1] = tmp;
-    }
-
-    // đánh dấu là chưa đọc
-    otherPartyChats.forEach((chatRef) => {
-      if (chatRef.chatId === chatId) {
-        chatRef.read = false;
-      }
-    });
-
-    await this.userModel.findByIdAndUpdate(selfId, self);
-    await this.userModel.findByIdAndUpdate(otherPartyId, otherParty);
   }
 }

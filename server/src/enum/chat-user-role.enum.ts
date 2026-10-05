@@ -1,0 +1,4 @@
+export enum ChatUserRole {
+  USER1 = 'USER1',
+  USER2 = 'USER2',
+}
