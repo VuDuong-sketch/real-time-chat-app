@@ -245,7 +245,7 @@ Example events:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/VuDuong-sketch/real-time-chat.git
+git clone https://github.com/VuDuong-sketch/real-time-chat-app.git
 
 cd real-time-chat
 ```
